@@ -205,9 +205,6 @@ class DbusGoeChargerService:
 
           self._dbusservice['/Mode'] = 0  # Manual, no control
           
-          #config = self._getConfig()
-          #hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
-          hardwareVersion =  self._dbusservice['/HardwareVersion']
           if hardwareVersion == 3:
             self._dbusservice['/MCU/Temperature'] = int(data['tma'][0])
           else:
