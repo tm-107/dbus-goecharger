@@ -25,6 +25,11 @@ class DbusGoeChargerService:
     config = self._getConfig()
     deviceinstance = int(config['DEFAULT']['Deviceinstance'])
     hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
+    acPosition = int(config['DEFAULT']['AcPosition'])
+    pauseBetweenRequests = int(config['ONPREMISE']['PauseBetweenRequests']) # in ms
+
+    if pauseBetweenRequests <= 20:
+      raise ValueError("Pause between requests must be greater than 20")
 
     self._dbusservice = VeDbusService("{}.http_{:02d}".format(servicename, deviceinstance))
     self._paths = paths
@@ -55,6 +60,7 @@ class DbusGoeChargerService:
     self._dbusservice.add_path('/HardwareVersion', hardwareVersion)
     self._dbusservice.add_path('/Connected', 1)
     self._dbusservice.add_path('/UpdateIndex', 0)
+    self._dbusservice.add_path('/Position', acPosition)
     
     # add paths without units
     for path in paths_wo_unit:
@@ -72,7 +78,7 @@ class DbusGoeChargerService:
     self._chargingTime = 0.0
 
     # add _update function 'timer'
-    gobject.timeout_add(250, self._update) # pause 250ms before the next request
+    gobject.timeout_add(pauseBetweenRequests, self._update) # pause before the next request
     
     # add _signOfLife 'timer' to get feedback in log every 5minutes
     gobject.timeout_add(self._getSignOfLifeInterval()*60*1000, self._signOfLife)
@@ -167,17 +173,23 @@ class DbusGoeChargerService:
   def _update(self):   
     try:
        #get data from go-eCharger
-       data = self._getGoeChargerData()
+       data = self._getGoeChargerData('nrg,eto,wh,alw,amp,ama,car,tmp,tma')
        
        if data is not None:
+
+          hardwareVersion = self._dbusservice['/HardwareVersion']
+        
           #send data to DBus
-          self._dbusservice['/Ac/L1/Power'] = int(data['nrg'][7] * 0.1 * 1000)
-          self._dbusservice['/Ac/L2/Power'] = int(data['nrg'][8] * 0.1 * 1000)
-          self._dbusservice['/Ac/L3/Power'] = int(data['nrg'][9] * 0.1 * 1000)
-          self._dbusservice['/Ac/Power'] = int(data['nrg'][11] * 0.01 * 1000)
+          self._dbusservice['/Ac/L1/Power'] = int(data['nrg'][7] * 100)
+          self._dbusservice['/Ac/L2/Power'] = int(data['nrg'][8] * 100)
+          self._dbusservice['/Ac/L3/Power'] = int(data['nrg'][9] * 100)
+          self._dbusservice['/Ac/Power'] = int(data['nrg'][11] * 10)
           self._dbusservice['/Ac/Voltage'] = int(data['nrg'][0])
           self._dbusservice['/Current'] = max(data['nrg'][4] * 0.1, data['nrg'][5] * 0.1, data['nrg'][6] * 0.1)
-          self._dbusservice['/Ac/Energy/Forward'] = int(float(data['eto']) / 10.0)
+          if int(hardwareVersion) < 4: 
+            self._dbusservice['/Ac/Energy/Forward'] = int(float(data['eto']) / 1000.0)
+          else:
+            self._dbusservice['/Ac/Energy/Forward'] = round(data['wh'] / 1000, 2)
           
           self._dbusservice['/StartStop'] = int(data['alw'])
           self._dbusservice['/SetCurrent'] = int(data['amp'])
