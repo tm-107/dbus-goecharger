@@ -65,8 +65,10 @@ Within the project there is a file `/data/dbus-goecharger/config.ini` - just cha
 | ------------- | ------------- | ------------- |
 | DEFAULT  | AccessType | Fixed value 'OnPremise' |
 | DEFAULT  | SignOfLifeLog  | Time in minutes how often a status is added to the log-file `current.log` with log-level INFO |
-| DEFAULT  | Deviceinstance | Unique ID identifying the shelly 1pm in Venus OS |
+| DEFAULT  | Deviceinstance | Unique ID identifying the go-e charger in Venus OS |
+| DEFAULT  | AcPosition | charger AC-Position: 0 = AC out, 1 = AC in |
 | ONPREMISE  | Host | IP or hostname of on-premise Shelly 3EM web-interface |
+| ONPREMISE  | PauseBetweenRequests | pause in ms before the next request |
 
 
 ## Usefull links
