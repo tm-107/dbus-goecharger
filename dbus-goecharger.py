@@ -127,7 +127,7 @@ class DbusGoeChargerService:
     
     # check for Json
     if not json_data:
-        raise ValueError("Converting response to JSON failed")
+      raise ValueError("Converting response to JSON failed")
     
     if json_data[parameter] == str(value):
       return True
@@ -193,8 +193,9 @@ class DbusGoeChargerService:
 
           self._dbusservice['/Mode'] = 0  # Manual, no control
           
-          config = self._getConfig()
-          hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
+          #config = self._getConfig()
+          #hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
+          hardwareVersion =  self._dbusservice['/HardwareVersion']
           if hardwareVersion == 3:
             self._dbusservice['/MCU/Temperature'] = int(data['tma'][0])
           else:
@@ -288,6 +289,7 @@ def main():
           '/Current': {'initial': 0, 'textformat': _a},
           '/SetCurrent': {'initial': 0, 'textformat': _a},
           '/MaxCurrent': {'initial': 0, 'textformat': _a},
+          #'/hardwareVersion': {'initial': 0, 'textformat': _a},
           '/MCU/Temperature': {'initial': 0, 'textformat': _degC},
           '/StartStop': {'initial': 0, 'textformat': lambda p, v: (str(v))}
         }
