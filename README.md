@@ -1,3 +1,6 @@
+**There will be no further development here for the time being.  
+I am now using [evcc](https://evcc.io/) on my Cerbo-S GX with [evcc-venusos-installer](https://github.com/tm-107/evcc-venusos-installer) and [dbus-evcc-multi](https://github.com/okuegow/dbus-evcc-multi).**
+
 # dbus-goecharger
 Integrate go-eCharger into Victron Energies Venus OS
 
